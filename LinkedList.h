@@ -28,5 +28,5 @@ Node* getNodeByPos(LinkedList *list, int pos);
 int add(LinkedList *list, int pos, void *data);
 int addAll(LinkedList *listDest, int pos, LinkedList *listSource);
 void* removePos(LinkedList *list, int pos);
-bool removeData(LinkedList *list, void *data, compare equal);
+int removeData(LinkedList *list, void *data, compare equal);
 #endif

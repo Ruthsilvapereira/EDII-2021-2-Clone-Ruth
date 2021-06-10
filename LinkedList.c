@@ -149,7 +149,7 @@ void* removePos(LinkedList *list, int pos) {
     
     return dataRemove;
 }
-bool removeData(LinkedList *list, void *data, compare equal) {
+int removeData(LinkedList *list, void *data, compare equal) {
     if (isEmpty(list)) return -1;
     Node *nodeRemove = NULL;
     if (equal(list->first->data,data)) {

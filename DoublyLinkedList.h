@@ -30,7 +30,7 @@ void* getPos(DoublyLinkedList *list,int pos);
 int add(DoublyLinkedList *list, int pos, void *data);
 int addAll(DoublyLinkedList *listDest, int pos, DoublyLinkedList *listSource);
 void* removePos(DoublyLinkedList *list, int pos);
-bool removeData(DoublyLinkedList *list, void *data, compare equal);
+int removeData(DoublyLinkedList *list, void *data, compare equal);
 void show(DoublyLinkedList *list, printNode print);
 void showMem(DoublyLinkedList *list);
 #endif
