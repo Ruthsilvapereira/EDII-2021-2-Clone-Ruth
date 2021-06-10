@@ -176,3 +176,6 @@ int removeData(LinkedList *list, void *data, compare equal) {
         }
     }
 }
+//Compilando sem ERRO
+//gcc Hash.c Hash.h HashTest.c -o teste
+//./teste
