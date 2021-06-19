@@ -1,6 +1,6 @@
 #include "Blockchain.h"
 #include <string.h>
-#include "sha-256.h"
+#include "sha256.h"
 #include <time.h>
 void initBlockchain(Blockchain *blockchain) {
     Block *genesisBlock = (Block*)malloc(sizeof(Block));
@@ -29,7 +29,10 @@ char* calculateHash(int index, char* previousHash, unsigned long timestamp, floa
     uint8_t hash[32];
     //char hash_string[65];
     char *hash_string = (char*)malloc(sizeof(char)*65);
-    calc_sha_256(hash, input, strlen(input));
+	//
+	//Programa só rpdou sem essa linha
+    //calc_sha_256(hash, input, strlen(input));
+	//
     hash_to_string(hash_string, hash);
     return hash_string;
 }

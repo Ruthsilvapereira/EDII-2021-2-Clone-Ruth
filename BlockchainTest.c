@@ -1,7 +1,8 @@
 #include "Blockchain.h"
+
 int main() {
     Blockchain blockchain;
-    printf("");
+    //printf("");
     initBlockchain(&blockchain);
     printf("%s\n",blockchain.genesisBlock->hash);
     printf("%lu\n",blockchain.genesisBlock->timestamp);
