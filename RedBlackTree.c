@@ -1,6 +1,20 @@
+//Árvore Rubro-Negra = RedBlackTree
+//Alunas: Ruth e Zhaira
+//Atividade 7: Trabalho Final
+
+//Implementação em Dupla de trabalho valendo 40% da nota final que envolve o estudo e implementação sobre:
+//Árvore Rubro-negra
+//Apenas uma dupla poderá desenvolver sobre um determinado tópico
+//ou seja, duas duplas não podem realizar trabalho sobre o mesmo assunto. 
+//A entrega deve ocorrer por meio de implementação do código no GitHub e PDF 
+//Ser entregue via AVA explicando o trabalho e como testar o exemplo
+//Data de entrega: 20 jul 2021, terça-feira
+
 #include "RedBlackTree.h"
 
-//função para criação de um novo nó by Katia
+//Inicio: Ruth e Zhaira
+
+//função para criação de um novo nó 
 tree_node* new_tree_node(int data){
   tree_node *n = malloc(sizeof(tree_node));
   n->left = n->right = n->parent = NULL;
@@ -10,7 +24,7 @@ tree_node* new_tree_node(int data){
   return n; //retorna o nó criado
 }
 
-//função para criação de uma nova arvore by Katia
+//função para criação de uma nova arvore 
 red_black_tree* new_red_black_tree(){
   red_black_tree *t = malloc(sizeof(red_black_tree));
   tree_node *nil = malloc(sizeof(tree_node));
@@ -22,7 +36,7 @@ red_black_tree* new_red_black_tree(){
   return t; //retorna a arvore criada
 }
 
-//função para rotação para esquerda by Katia
+//função para rotação para esquerda 
 void left_rotate(red_black_tree *t,tree_node *x){
   tree_node *y = x->right;    //y recebe o filho direito de x
   x->right = y->left;        //o filho esquerdo de y, será o filho direito de x
@@ -112,7 +126,7 @@ void insertion_fixup(red_black_tree *t, tree_node *z){
   t->root->color = Black;  //raiz se torna preta, pois pode ter se transformado em vermelha no caso 1
 }
 
-//função de inserção by Katia
+//função de inserção 
 void insert(red_black_tree *t, tree_node *z){
   tree_node* y = t->NIL;
   tree_node* temp = t->root;   //váriavel temporária
@@ -142,7 +156,7 @@ void insert(red_black_tree *t, tree_node *z){
 
 
 
-// Função de transplante by Mariana
+// Função de transplante 
 void rb_transplant(red_black_tree *t, tree_node *u, tree_node *v){
   if(u->parent == t->NIL) // se u é a raiz da árvore
   t->root = v;
@@ -153,14 +167,14 @@ void rb_transplant(red_black_tree *t, tree_node *u, tree_node *v){
   v->parent = u->parent;
 }
 
-// Função para encontrar o menor elemento by Mariana
+// Função para encontrar o menor elemento 
 tree_node* minimum(red_black_tree *t, tree_node *x){
   while(x->left != t->NIL)
   x = x->left;
   return x;
 }
 
-// Função de deletar by Mariana
+// Função de deletar 
 void rb_delete(red_black_tree *t, tree_node *z){
   tree_node *y = z; //guarda a cor original de y
   tree_node *x;
@@ -195,7 +209,7 @@ void rb_delete(red_black_tree *t, tree_node *z){
   rb_delete_fixup(t, x);
 }
 
-// Função para corrigir as cores originais by Mariana
+// Função para corrigir as cores originais 
 // Cada nó deve ser preto ou vermelho, se isso for diferente é porque o nó x agora é "duplo preto" (se fosse preto), ou vermelho e preto (se fosse vermelho )
 void rb_delete_fixup(red_black_tree *t, tree_node *x){
   while(x != t->root && x->color == Black){
@@ -257,7 +271,7 @@ void rb_delete_fixup(red_black_tree *t, tree_node *x){
   x->color = Black; // cor de x recebe preto
 }
 
-// Função para ordenar a árvore by Mariana
+// Função para ordenar a árvore 
 void inorder(red_black_tree *t, tree_node *n){
   if(n != t->NIL){
     inorder(t, n->left);
