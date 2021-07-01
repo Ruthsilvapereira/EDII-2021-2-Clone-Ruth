@@ -14,14 +14,16 @@
 
 //Inicio: Ruth e Zhaira
 
-//função para criação de um novo nó 
+//criar um novo nó 
 tree_node* new_tree_node(int data){
   tree_node *n = malloc(sizeof(tree_node));
   n->left = n->right = n->parent = NULL;
   n->data = data;
-  n->color = Red;  //o nó sempre será vermelho
-
-  return n; //retorna o nó criado
+	//nó vermelho
+  n->color = Red; 
+	
+//retorna o nó criado
+  return n; 
 }
 
 //função para criação de uma nova arvore 
@@ -314,7 +316,7 @@ void menu_insert(red_black_tree *t){
 void menu_delete(red_black_tree *t) {
     int del;
 
-    printf("Qual valor voce deseja deletar?");
+    printf("Qual valor voce deseja excluir?");
     scanf("%d", &del);
     tree_node* z = search(t,del);
     if(z == NULL) {
@@ -330,11 +332,11 @@ int main (){
 
   do
   {
-    printf("\n\tOpcoes:\n\n");
-    printf("0. Sair\n");
-    printf("1. Inserir\n");
-    printf("2. Deletar\n");
-    printf("3. Listar\n");
+    printf("\n\tMenu de opcoes:\n\t");
+    printf("0. Close - FECHAR\n\t");
+    printf("1. Adicionar - INSERIR VALOR\n\t");
+    printf("2. Excluir - EXCLUIR VALORES\n\t");
+    printf("3. Listar - MOSTRAR DADOS\n\t");
 
     scanf("%d", &continuar);
     system("cls || clear");
@@ -357,7 +359,7 @@ int main (){
       break;
 
       default:
-      printf("Digite uma opcao valida\n");
+      printf("Tente novamente - digite uma opcao valida\n\n");
     }
     /*system ("pause");
     system("cls || clear");*/
@@ -365,3 +367,6 @@ int main (){
 
   return 0;
 }
+
+//gcc RedBlackTree.c RedBlackTree.h -o RedBlackTree
+//./RedBlackTree
