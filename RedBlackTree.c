@@ -10,363 +10,390 @@
 //Ser entregue via AVA explicando o trabalho e como testar o exemplo
 //Data de entrega: 20 jul 2021, terça-feira
 
+//Árvore Rubro-Negra (Árvores Vermelho-Preto ou Red-black Trees), são árvores binárias de busca, com algumas propriedades definidas: 
+//1. Todo nó é vermelho ou preto 
+//2. A raiz é preta 
+//3. Toda folha (Nil) é preta 
+//4. Se um nó é vermelho, então os seus filhos são pretos 
+//5. Para cada nó, todos os caminhos do nó para folhas descendentes contém o mesmo número de nós PRETOS.
+
+//simulador online de Árvore Rubro-Negra
+//https://www.cs.usfca.edu/~galles/visualization/RedBlack.html
+
 #include "RedBlackTree.h"
 
-//Inicio: Ruth e Zhaira
-
-//criar um novo nó 
-tree_node* new_tree_node(int data){
-  tree_node *n = malloc(sizeof(tree_node));
-  n->left = n->right = n->parent = NULL;
-  n->data = data;
-	//nó vermelho
-  n->color = Red; 
-	
-//retorna o nó criado
-  return n; 
-}
-
-//função para criação de uma nova arvore 
-red_black_tree* new_red_black_tree(){
-  red_black_tree *t = malloc(sizeof(red_black_tree));
-  tree_node *nil = malloc(sizeof(tree_node));
-  nil->left= nil->right = nil->parent =NULL; //não tem nada após o nil
-  nil->color = Black; // e ele é sempre preto
-  nil->data = 0;
-  t->NIL = nil;
-  t->root = t-> NIL;
-  return t; //retorna a arvore criada
-}
-
-//função para rotação para esquerda 
-void left_rotate(red_black_tree *t,tree_node *x){
-  tree_node *y = x->right;    //y recebe o filho direito de x
-  x->right = y->left;        //o filho esquerdo de y, será o filho direito de x
-  if(y->left != t->NIL){
-    y->left->parent = x;            //mudança do pai de x
-  }
-  y->parent = x->parent;         //mudança de pai de y
-  if(x->parent == t->NIL) {         //se x é raiz
-    t->root =y;
-  }                       //a raiz se recebe o filho direito de x
-  else if (x==x->parent->left){  // x é o filho esquerdo
-    x->parent->left = y;
-  }
-  else {                          // x é o  filho direito
-    x->parent->right = y;
-  }
-  y->left = x;                 //x se torna filho esquerdo de y
-  x->parent = y;              // y se torna pai de x
-}
-
-//função para rotação para direita
-void right_rotate(red_black_tree *t, tree_node *x){
-  tree_node *y = x->left; // y recebe o filho esquerdo de x
-  x->left = y->right; // o filho direito de y, será o filho esquerdo de x
-  if(y->right != t->NIL){
-    y->right->parent = x; // mudança do pai de x
-  }
-  y->parent = x->parent;
-  if(x->parent == t->NIL){ // se x é a raiz
-    t->root = y; // a raiz recebe o filho esquerdo de x
-  }
-  else if(x == x->parent->right){ // se x é o filho direito
-    x->parent->right = y;
-  }
-  else{ // se x é o filho esquerdo
-    x->parent->left = y;
-  }
-  y->right = x; // x se torna o filho direito de y
-  x->parent = y; // y se torna pai de x
-
-}
-
-
-void insertion_fixup(red_black_tree *t, tree_node *z){
-  while (z->parent->color == Red){   //correção se o pai do nó estiver rubro
-    if(z->parent == z->parent->parent->left){   //para quando o pai de z é o filho esquerdo
-      tree_node *y= z->parent->parent->right;  //tio de z
-
-      if(y->color == Red){ //caso1: pai e tio são rubros
-        z->parent->color = Black;   //pai se torna preto
-        y->color = Black;        //tio se torna preto
-        z->parent->parent->color = Red;     // avô se torna rubro
-        z = z->parent->parent;      // z aponta para o avô para verificação de coloração
-      }
-      else {
-        if(z==z->parent->right){ //caso 2 : tio do nó é preto e o nó é filho direito
-          z=z->parent;
-          left_rotate (t,z); //rotação para tornar um caso 2 em caso 3
-        }
-
-        //caso 3: tio do nó é preto e o nó é filho esquerdo
-        z->parent->color = Black;  //faz o nó  pai preto
-        z->parent->parent->color = Red; //faz nó-avô rubro
-        right_rotate(t, z->parent->parent);  //faz a rotação para direita para correção
-      }
-    }
-    else{
-      //para quando o pai do z é o filho direito
-      tree_node *y=z->parent->parent->left;     //tio de z
-      if(y->color == Red){      //caso 1: pai e tio são rubros
-        z->parent->color = Black;    //pai se torna preto
-        y->color = Black;           //tio se torna preto
-        z->parent->parent->color = Red;  //avô se torna rubro
-        z=z->parent->parent;            //aponta para o avô para verificação de coloração
-      }
-      else {
-        if(z==z->parent->left){ //caso 2 : tio do nó é preto e o nó é filho esquerdo
-          z=z->parent;
-          right_rotate(t,z); //rotação para tornar um caso 2 em caso 3
-        }
-        z->parent->color = Black; // faz pais negros
-        z->parent->parent->color = Red; //faz avôs rubros
-        left_rotate(t, z->parent->parent); //faz a rotação para esquerda para correção
-      }
-    }
-  }
-  t->root->color = Black;  //raiz se torna preta, pois pode ter se transformado em vermelha no caso 1
-}
-
-//função de inserção 
-void insert(red_black_tree *t, tree_node *z){
-  tree_node* y = t->NIL;
-  tree_node* temp = t->root;   //váriavel temporária
-
-  while(temp != t->NIL){       //começa na raiz e vai até encontrar NIL
-    y=temp;
-    if(z->data < temp->data)  //o nó da arvore < dado que deseja ser inserido
-    temp = temp->left;      //insere a esquerda
-    else
-    temp = temp->right;       //ou a direita, caso seja maior
-  }
-  z->parent = y; //no caso da arvore não ter nó, o novo nó será a raiz;
-
-  //se tiver nó, ele estará apontado para o último nó
-  if(y == t->NIL)
-  t->root = z;             //se nulo, o novo nó será a raiz
-  else if (z->data < y->data)
-  y->left = z;             //se < que o dado existe, vai para esquerda
-  else
-  y->right = z;            //se > , direita
-
-  //atribuição de NIL para nós sem filhos
-  z->right = z->left = t->NIL;
-
-  insertion_fixup(t,z);  //para verificação das regras da coloração
-}
-
-
-
-// Função de transplante 
-void rb_transplant(red_black_tree *t, tree_node *u, tree_node *v){
-  if(u->parent == t->NIL) // se u é a raiz da árvore
-  t->root = v;
-  else if(u == u->parent->left) // se u é o filho da esquerda
-  u->parent->left = v;
-  else // se u é o filho da direita
-  u->parent->right = v;
-  v->parent = u->parent;
-}
-
-// Função para encontrar o menor elemento 
-tree_node* minimum(red_black_tree *t, tree_node *x){
-  while(x->left != t->NIL)
-  x = x->left;
-  return x;
-}
-
-// Função de deletar 
-void rb_delete(red_black_tree *t, tree_node *z){
-  tree_node *y = z; //guarda a cor original de y
-  tree_node *x;
-  enum COLOR y_orignal_color = y->color;
-
-  if(z->left == t->NIL){ //se for sem filhos ou tiver filhos só na direita
-    x = z->right;
-    rb_transplant(t, z, z->right);
-  }
-  else if(z->right == t->NIL){ // se só tem filho na esquerda
-    x = z->left;
-    rb_transplant(t, z, z->left);
-  }
-  else{ //se tem filhos para os dois lados
-    y = minimum(t, z->right); // marca o menor elemento do galho direito de z
-    y_orignal_color = y->color;
-    x = y->right; // guarda o filho direito de y
-    if(y->parent == z){ // se y é um filho direto de z
-      x->parent = z;
-    }
-    else{ // se não for filho direto
-      rb_transplant(t, y, y->right);
-      y->right = z->right; // então a direita de y recebe a direita de z
-      y->right->parent = y;
-    }
-    rb_transplant(t, z, y); // neste ponto o y já pode ser transplantado para z
-    y->left = z->left; // passa a esquerda de z para a esquerda de y
-    y->left->parent = y;
-    y->color = z->color; // y recebe a cor de z
-  }
-  if(y_orignal_color == Black) // conserta a violação se a cor original de y for preto
-  rb_delete_fixup(t, x);
-}
-
-// Função para corrigir as cores originais 
-// Cada nó deve ser preto ou vermelho, se isso for diferente é porque o nó x agora é "duplo preto" (se fosse preto), ou vermelho e preto (se fosse vermelho )
-void rb_delete_fixup(red_black_tree *t, tree_node *x){
-  while(x != t->root && x->color == Black){
-    if(x == x->parent->left){ // se for irmão da direita
-      tree_node *w = x->parent->right; // w é irmão da direita de x
-      if(w->color == Red){ // se w é vermelho
-        w->color = Black;
-        x->parent->color = Red; // troca as cores de w e seu pai
-        left_rotate(t, x->parent); // gira para a esquerda o pai de x, trocando as cores de w e x
-        w = x->parent->right; // por ter rotacionado, é criado um novo irmão da direita
-      }
-      if(w->left->color == Black && w->right->color == Black){ // se w é preto e seus filhos também
-        w->color = Red; // transforma o w em vermelho
-        x = x->parent; // coloca um preto extra no pai de x e marca como novo x
-      }
-      else{
-        if(w->right->color == Black){ // se w é preto, e o filho da direita é preto e o filho da esquerda é vermelho
-          w->left->color = Black; // troca as cores de w e seu filho esquerdo
-          w->color = Red;
-          right_rotate(t, w); // gira w para a direita.
-          w = x->parent->right; // w é o novo irmão da direita
-        }
-        // se w é preto e o filho da direita é vermelho
-        w->color = x->parent->color; // w recebe a mesma cor que o pai de x
-        x->parent->color = Black; // colore o pai de x de preto
-        w->right->color = Black; //colore o filho direito de w de preto
-        left_rotate(t, x->parent); // gira o pai de x para a esquerda
-        x = t->root; // remove o preto extra de x
-      }
-    }
-    else{ // se for irmão da esquerda
-      tree_node *w = x->parent->left; // w é irmão da esquerda de x
-      if(w->color == Red){ // se w é vermelho
-        w->color = Black;
-        x->parent->color = Red; // troca as cores de w e seu pai
-        right_rotate(t, x->parent); // gira para a direita o pai de x, trocando as cores de w e x
-        w = x->parent->left; // por ter rotacionado, é criado um novo irmão da esquerda
-      }
-      if(w->right->color == Black && w->left->color == Black){ // se w é preto e seus filhos também
-        w->color = Red; // transforma o w em vermelho
-        x = x->parent; // coloca um preto extra no pai de x e marca como novo x
-      }
-      else{
-        if(w->left->color == Black){ // se w é preto, e o filho da esquerda é preto e o filho da direita é vermelho
-          w->right->color = Black;// troca as cores de w e seu filho direito
-          w->color = Red;
-          left_rotate(t, w); // gira w para a esquerda.
-          w = x->parent->left; // w é o novo irmão da esquerda
-        }
-        // se w é preto e o filho da esquerda é vermelho
-        w->color = x->parent->color; // w recebe a mesma cor que o pai de x
-        x->parent->color = Black; // colore o pai de x de preto
-        w->left->color = Black; //colore o filho esquerdo de w de preto
-        right_rotate(t, x->parent); // gira o pai de x para a direita
-        x = t->root; // remove o preto extra de x
-      }
-    }
-  }
-  x->color = Black; // cor de x recebe preto
-}
-
-// Função para ordenar a árvore 
-void inorder(red_black_tree *t, tree_node *n){
-  if(n != t->NIL){
-    inorder(t, n->left);
-
-    printf(" %d  \t", n->data);
-    inorder(t, n->right);
-
-  }
-}
-
-//Função utilitária para recuperar o nó pelo seu valor
-tree_node *search(red_black_tree* t, int valor) {
-    tree_node* z = NULL;
-    tree_node* ref = t->root;
-    while (ref != t->NIL){
-        if (ref->data == valor) {
-            z = ref;
-        }
-
-        if (ref->data <= valor) {
-            ref = ref->right;
-        } else {
-            ref = ref->left;
-        }
-    }
-    return z;
-}
-
-//Função para a ação de inserir do menu
-void menu_insert(red_black_tree *t){
-  int add;
-
-  printf("Inserir o valor: ");
-  scanf("%d",&add);
-  tree_node* z = new_tree_node(add);
-  insert(t,z);
-}
-
-//Função para a ação de deletar do menu
-void menu_delete(red_black_tree *t) {
-    int del;
-
-    printf("Qual valor voce deseja excluir?");
-    scanf("%d", &del);
-    tree_node* z = search(t,del);
-    if(z == NULL) {
-        printf("O valor não está na lista!");
-        return;
-    }
-    rb_delete(t, z);
-}
-
+//Menu do Usuário
 int main (){
   red_black_tree *t = new_red_black_tree();
   int continuar;
 
   do
   {
-    printf("\n\tMenu de opcoes:\n\t");
-    printf("0. Close - FECHAR\n\t");
-    printf("1. Adicionar - INSERIR VALOR\n\t");
-    printf("2. Excluir - EXCLUIR VALORES\n\t");
-    printf("3. Listar - MOSTRAR DADOS\n\t");
+	printf("\n\tDigite 0 para fechar\n\t");
+	printf("Digite 1 para adicionar valores\n\t");
+	printf("Digite 2 para excluir um valor informado\n\t");
+	printf("Digite 3 para visualização\n\n\t");
 
-    scanf("%d", &continuar);
-    system("cls || clear");
+	scanf("%d", &continuar);
+	system("cls || clear");
 
-    switch(continuar)
-    {
-      case 1:
-      menu_insert(t);
-      break;
+	switch(continuar)
+	{
+	  case 0:
+	  break;
 
-      case 2:
-      menu_delete(t);
-      break;
+	  default:
+	  printf("opção invalida\n\n");
 
-      case 3:
-      inorder(t, t->root);
-      break;
+	  case 1:
+	  menu_insert(t);
+	  break;
 
-      case 0:
-      break;
+	  case 2:
+	  menu_delete(t);
+	  break;
 
-      default:
-      printf("Tente novamente - digite uma opcao valida\n\n");
-    }
-    /*system ("pause");
-    system("cls || clear");*/
+	  case 3:
+	  inorder(t, t->root);
+	  break;
+	}
   } while(continuar);
 
   return 0;
+} 
+
+//Inserção do valor informado pelo usuario
+void menu_insert(red_black_tree *t){
+  int add;
+
+  printf("Digite o valor: ");
+  scanf("%d",&add);
+  tree_node* z = new_tree_node(add);
+  insert(t,z);
 }
 
+//função para criar um novo nó
+//novo: novo nó
+tree_node* new_tree_node(int data){
+  tree_node *novo = malloc(sizeof(tree_node));
+  novo->left = novo->right = novo->parent = NULL;
+  novo->data = data;
+  novo->color = Red; 
+	
+  return novo; 
+}
+
+//função para criação de uma nova arvore 
+//toda folha (Nil) é preta 
+//t: retorna a arvore criada
+red_black_tree* new_red_black_tree(){
+  red_black_tree *t = malloc(sizeof(red_black_tree));
+  tree_node *nil = malloc(sizeof(tree_node));
+  nil->left= nil->right = nil->parent =NULL; 
+  nil->color = Black; 
+  nil->data = 0;
+  t->NIL = nil;
+  t->root = t-> NIL;
+  return t; 
+}
+
+//Cada vez que uma operação for realizada na árvore, o conjunto de propriedades é testado e caso alguma não seja satisfeita, são realizadas rotações ou ajustes de cores, de forma que a árvore permaneça balanceada.
+
+//função para rotação para esquerda/left
+void left_rotate(red_black_tree *t,tree_node *x){
+  tree_node *y = x->right;    
+  x->right = y->left;        
+  if(y->left != t->NIL){
+	y->left->parent = x;            
+  }
+  y->parent = x->parent;         
+  if(x->parent == t->NIL) {         
+	t->root =y;
+  }                       
+  else if (x==x->parent->left){  
+	x->parent->left = y;
+  }
+  else {                          
+	x->parent->right = y;
+  }
+  y->left = x;                 
+  x->parent = y;              
+}
+
+//função para rotação para direita/right
+void right_rotate(red_black_tree *t, tree_node *x){
+  tree_node *y = x->left; 
+  x->left = y->right; 
+  if(y->right != t->NIL){
+	y->right->parent = x; 
+  }
+  y->parent = x->parent;
+  if(x->parent == t->NIL){ 
+	t->root = y; 
+  }
+  else if(x == x->parent->right){ 
+	x->parent->right = y;
+  }
+  else{ 
+	x->parent->left = y;
+  }
+  y->right = x; 
+  x->parent = y; 
+
+}
+
+//Um nó é inserido sempre na cor vermelha, assim, não altera a altura negra da árvore. Caso fosse inserido na cor preta, invalidaria a seguinte propriedade: para cada nó, todos os caminhos do nó para folhas descendentes contém o mesmo número de nós PRETOS.
+
+//CASO DE VIOLAÇÃO - INSERÇÃO 
+//Pai e Tio Vermelhos
+//Irmãos com Cores Diferentes e Pai Vermelho
+//Irmãos com Cores Diferentes e Pai Preto
+//Cada vez que uma operação for realizada na árvore, o conjunto de propriedades é testado e caso alguma não seja satisfeita, são realizadas rotações ou ajustes de cores, de forma que a árvore permaneça balanceada.
+
+//função de inserção 
+void insert(red_black_tree *t, tree_node *z){
+  tree_node* y = t->NIL;
+  tree_node* temp = t->root;   
+
+  while(temp != t->NIL){       
+	y=temp;
+	if(z->data < temp->data)  
+	temp = temp->left;      
+	else
+	temp = temp->right;      
+  }
+  z->parent = y; 
+
+ 
+  if(y == t->NIL)
+  t->root = z;             
+  else if (z->data < y->data)
+  y->left = z;             
+  else
+  y->right = z;            
+
+  z->right = z->left = t->NIL;
+
+  insertion_fixup(t,z);  
+}
+
+//CASO DE VIOLAÇÃO - INSERÇÃO 
+//Pai e Tio Vermelhos
+//Irmãos com Cores Diferentes e Pai Vermelho
+//Irmãos com Cores Diferentes e Pai Preto
+//Cada vez que uma operação for realizada na árvore, o conjunto de propriedades é testado e caso alguma não seja satisfeita, são realizadas rotações ou ajustes de cores, de forma que a árvore permaneça balanceada. 
+void insertion_fixup(red_black_tree *t, tree_node *z){
+  while (z->parent->color == Red){   //pai vermelho
+	if(z->parent == z->parent->parent->left){   
+	  tree_node *y= z->parent->parent->right;  
+
+	  if(y->color == Red){ //pai e tio vermelho
+		z->parent->color = Black;   
+		y->color = Black;        
+		z->parent->parent->color = Red;     
+		z = z->parent->parent;      
+	  }
+	  else {
+		if(z==z->parent->right){ 
+		  z=z->parent;
+		  left_rotate (t,z); 
+		}
+
+		z->parent->color = Black;  
+		z->parent->parent->color = Red; 
+		right_rotate(t, z->parent->parent);  
+	  }
+	}
+	else{
+	 
+	  tree_node *y=z->parent->parent->left;    
+	  if(y->color == Red){      
+		z->parent->color = Black;   
+		y->color = Black;           
+		z->parent->parent->color = Red;  
+		z=z->parent->parent;            
+	  }
+	  else {
+		if(z==z->parent->left){ 
+		  z=z->parent;
+		  right_rotate(t,z); 
+		}
+		z->parent->color = Black; 
+		z->parent->parent->color = Red; 
+		left_rotate(t, z->parent->parent); 
+	  }
+	}
+  }
+  t->root->color = Black;  
+}
+
+//rb_transplant: função transplante 
+void rb_transplant(red_black_tree *t, tree_node *u, tree_node *v){
+  if(u->parent == t->NIL) 
+  t->root = v;
+  else if(u == u->parent->left) 
+  u->parent->left = v;
+  else 
+  u->parent->right = v;
+  v->parent = u->parent;
+}
+
+//Localizando o menor valor  
+tree_node* minimum(red_black_tree *t, tree_node *x){
+  while(x->left != t->NIL)
+  x = x->left;
+  return x;
+}
+
+//A remoção de um nó vermelho não pode violar as regras de uma árvore rubro-negra 
+//A remoção de um nó preto certamente causará uma violação preta do mesmo modo que a inserção de um nó preto causaria
+//CASO DE VIOLAÇÃO - REMOÇÃO
+//Nó Removido Preto com Filho Vermelho
+//Nó Removido Irmão Preto e Sobrinho Preto
+//Nó Removido Irmão Preto e Sobrinho(s) Vermelho(s)
+//Cada vez que uma operação for realizada na árvore, o conjunto de propriedades é testado e caso alguma não seja satisfeita, são realizadas rotações ou ajustes de cores, de forma que a árvore permaneça balanceada. 
+// Função de remoção
+void rb_delete(red_black_tree *t, tree_node *z){
+  tree_node *y = z; 
+  tree_node *x;
+  enum COLOR y_orignal_color = y->color;
+
+  if(z->left == t->NIL){ 
+	x = z->right;
+	rb_transplant(t, z, z->right);
+  }
+  else if(z->right == t->NIL){ 
+	x = z->left;
+	rb_transplant(t, z, z->left);
+  }
+  else{ 
+	y = minimum(t, z->right); 
+	y_orignal_color = y->color;
+	x = y->right; 
+	if(y->parent == z){ 
+	  x->parent = z;
+	}
+	else{ 
+	  rb_transplant(t, y, y->right);
+	  y->right = z->right; 
+	  y->right->parent = y;
+	}
+	rb_transplant(t, z, y); 
+	y->left = z->left; 
+	y->left->parent = y;
+	y->color = z->color; 
+  }
+  if(y_orignal_color == Black) 
+  rb_delete_fixup(t, x);
+}
+
+// Função para corrigir as cores originais 
+void rb_delete_fixup(red_black_tree *t, tree_node *x){
+  while(x != t->root && x->color == Black){
+	if(x == x->parent->left){ 
+	  tree_node *w = x->parent->right; 
+	  if(w->color == Red){ 
+		w->color = Black;
+		x->parent->color = Red; 
+		left_rotate(t, x->parent); 
+		w = x->parent->right; 
+	  }
+	  if(w->left->color == Black && w->right->color == Black){ 
+		w->color = Red; 
+		x = x->parent; 
+	  }
+	  else{
+		if(w->right->color == Black){ 
+		  w->left->color = Black; 
+		  w->color = Red;
+		  right_rotate(t, w); 
+		  w = x->parent->right; 
+		}
+		
+		w->color = x->parent->color; 
+		x->parent->color = Black; 
+		w->right->color = Black; 
+		left_rotate(t, x->parent); 
+		x = t->root; 
+	  }
+	}
+	else{ 
+	  tree_node *w = x->parent->left; 
+	  if(w->color == Red){ 
+		w->color = Black;
+		x->parent->color = Red; 
+		right_rotate(t, x->parent); 
+		w = x->parent->left; 
+	  }
+	  if(w->right->color == Black && w->left->color == Black){ 
+		w->color = Red; 
+		x = x->parent; 
+	  }
+	  else{
+		if(w->left->color == Black){ 
+		  w->right->color = Black;
+		  w->color = Red;
+		  left_rotate(t, w); 
+		  w = x->parent->left; 
+		}
+		
+		w->color = x->parent->color; 
+		x->parent->color = Black; 
+		w->left->color = Black; 
+		right_rotate(t, x->parent); 
+		x = t->root; 
+	  }
+	}
+  }
+  x->color = Black; 
+}
+
+//Organiza a àrvore 
+void inorder(red_black_tree *t, tree_node *n){
+  if(n != t->NIL){
+	inorder(t, n->left);
+
+	printf(" %d  \t", n->data);
+	inorder(t, n->right);
+
+  }
+}
+
+//busca o nó
+tree_node *search(red_black_tree* t, int valor) {
+	tree_node* z = NULL;
+	tree_node* ref = t->root;
+	while (ref != t->NIL){
+		if (ref->data == valor) {
+			z = ref;
+		}
+
+		if (ref->data <= valor) {
+			ref = ref->right;
+		} else {
+			ref = ref->left;
+		}
+	}
+	return z;
+}
+
+
+//Delete
+//encontra o valor e exclui ou caso seja NULL retorna a informação que o valor informado não foi encontrado na lista
+void menu_delete(red_black_tree *t) {
+	int del;
+
+	printf("Digite o valor a ser excluido: ");
+	scanf("%d", &del);
+	tree_node* z = search(t,del);
+	if(z == NULL) {
+		printf("O valor informado não está na lista, tente novamente.");
+		return;
+	}
+	rb_delete(t, z);
+}
+
+//As operações Inserir e Remover são mais complicadas nas Árvores Rubro-Negras porque elas podem ferir alguma propriedade deste tipo de árvore.
+//é necessario usar a RedBlackTree.c e a RedBlackTree.h
 //gcc RedBlackTree.c RedBlackTree.h -o RedBlackTree
 //./RedBlackTree
